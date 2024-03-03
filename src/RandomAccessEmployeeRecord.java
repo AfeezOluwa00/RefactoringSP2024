@@ -1,81 +1,51 @@
-/*
- * 
- * This is a Random Access Employee record definition
- * 
- * */
-
 import java.io.RandomAccessFile;
 import java.io.IOException;
 
-public class RandomAccessEmployeeRecord extends Employee
-{  
-    public static final int SIZE = 175; // Size of each RandomAccessEmployeeRecord object
+public class RandomAccessEmployeeRecord extends Employee {
+    public static final int RECORD_SIZE = 175;
 
-   // Create empty record
-   public RandomAccessEmployeeRecord()
-   {
-      this(0, "","","",'\0', "", 0.0, false);
-   } // end RandomAccessEmployeeRecord
+    public RandomAccessEmployeeRecord() {
+        this(0, "", "", "", '\0', "", 0.0, false);
+    }
 
-   // Initialize record with details
-   public RandomAccessEmployeeRecord( int employeeId, String pps, String surname, String firstName, char gender, 
-		   String department, double salary, boolean fullTime)
-   {
-      super(employeeId, pps, surname, firstName, gender, department, salary, fullTime);
-   } // end RandomAccessEmployeeRecord
+    public RandomAccessEmployeeRecord(int employeeId, String pps, String surname, String firstName,
+                                      char gender, String department, double salary, boolean fullTime) {
+        super(employeeId, pps, surname, firstName, gender, department, salary, fullTime);
+    }
 
-   // Read a record from specified RandomAccessFile
-   public void read( RandomAccessFile file ) throws IOException
-   {
-	   	setEmployeeId(file.readInt());
-		setPps(readName(file));
-		setSurname(readName(file));
-		setFirstName(readName(file));
-		setGender(file.readChar());
-		setDepartment(readName(file));
-		setSalary(file.readDouble());
-		setFullTime(file.readBoolean());
-   } // end read
+    public void read(RandomAccessFile file) throws IOException {
+        setEmployeeId(file.readInt());
+        setPps(readString(file));
+        setSurname(readString(file));
+        setFirstName(readString(file));
+        setGender(file.readChar());
+        setDepartment(readString(file));
+        setSalary(file.readDouble());
+        setFullTime(file.readBoolean());
+    }
 
-   // Ensure that string is correct length
-   private String readName( RandomAccessFile file ) throws IOException
-   {
-      char name[] = new char[ 20 ], temp;
+    private String readString(RandomAccessFile file) throws IOException {
+        char[] name = new char[20];
+        for (int i = 0; i < name.length; i++) {
+            name[i] = file.readChar();
+        }
+        return new String(name).trim();
+    }
 
-      for ( int count = 0; count < name.length; count++ )
-      {
-         temp = file.readChar();
-         name[ count ] = temp;
-      } // end for     
-      
-      return new String( name ).replace( '\0', ' ' );
-   } // end readName
+    public void write(RandomAccessFile file) throws IOException {
+        file.writeInt(getEmployeeId());
+        writeString(file, getPps().toUpperCase());
+        writeString(file, getSurname().toUpperCase());
+        writeString(file, getFirstName().toUpperCase());
+        file.writeChar(getGender());
+        writeString(file, getDepartment());
+        file.writeDouble(getSalary());
+        file.writeBoolean(getFullTime());
+    }
 
-   // Write a record to specified RandomAccessFile
-   public void write( RandomAccessFile file ) throws IOException
-   {
-      file.writeInt( getEmployeeId() );
-      writeName(file, getPps().toUpperCase());
-      writeName( file, getSurname().toUpperCase() );
-      writeName( file, getFirstName().toUpperCase() );
-      file.writeChar(getGender());
-      writeName(file,getDepartment());
-      file.writeDouble( getSalary() );
-      file.writeBoolean(getFullTime());
-   } // end write
-
-   // Ensure that string is correct length
-   private void writeName( RandomAccessFile file, String name )
-      throws IOException
-   {
-      StringBuffer buffer = null;
-
-      if ( name != null ) 
-         buffer = new StringBuffer( name );
-      else 
-         buffer = new StringBuffer( 20 );
-
-      buffer.setLength( 20 );
-      file.writeChars( buffer.toString() );
-   } // end writeName
-} // end class RandomAccessEmployeeRecord
+    private void writeString(RandomAccessFile file, String data) throws IOException {
+        StringBuffer buffer = new StringBuffer(data != null ? data : "");
+        buffer.setLength(20);
+        file.writeChars(buffer.toString());
+    }
+}
